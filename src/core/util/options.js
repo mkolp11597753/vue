@@ -172,6 +172,7 @@ LIFECYCLE_HOOKS.forEach((hook) => {
  * a three-way merge between constructor options, instance
  * options and parent options.
  */
+// assets 合并策略
 function mergeAssets(
   parentVal: ?Object,
   childVal: ?Object,
@@ -239,6 +240,7 @@ strats.props = strats.methods = strats.inject = strats.computed = function (
   vm?: Component,
   key: string
 ): ?Object {
+  // childVal必须是个plainObject
   if (childVal && process.env.NODE_ENV !== "production") {
     assertObjectType(key, childVal, vm);
   }
@@ -295,6 +297,8 @@ function normalizeProps(options: Object, vm: ?Component) {
   if (!props) return;
   const res = {};
   let i, val, name;
+  // options: {props: ['p1', 'p2', ...]}
+  // camelize: 返回驼峰形式
   if (Array.isArray(props)) {
     i = props.length;
     while (i--) {
@@ -307,6 +311,7 @@ function normalizeProps(options: Object, vm: ?Component) {
       }
     }
   } else if (isPlainObject(props)) {
+    // options: {props: {prop1: '', prop2: '', prop3: {default: '', value: ''}}}
     for (const key in props) {
       val = props[key];
       name = camelize(key);
@@ -319,6 +324,12 @@ function normalizeProps(options: Object, vm: ?Component) {
       vm
     );
   }
+  // 格式化props为
+  // res = {
+  //   prop1: { type: null },
+  //   prop2: { type: "someVal" },
+  //   prop3: {a: '', b:'' , c:''}
+  // };
   options.props = res;
 }
 
@@ -377,6 +388,7 @@ function assertObjectType(name: string, value: any, vm: ?Component) {
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
+ * 合并两个options
  */
 export function mergeOptions(
   parent: Object,
@@ -388,10 +400,12 @@ export function mergeOptions(
     checkComponents(child);
   }
 
+  // 如果传入构造函数 则直接取options
   if (typeof child === "function") {
     child = child.options;
   }
 
+  // 格式化props、Inject和Directives
   normalizeProps(child, vm);
   normalizeInject(child, vm);
   normalizeDirectives(child);
@@ -400,6 +414,7 @@ export function mergeOptions(
   // but only if it is a raw options object that isn't
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
+  // 只有调用Vue.extends生成Sub构造函数时， 才满足!child._base
   if (!child._base) {
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm);
@@ -411,6 +426,7 @@ export function mergeOptions(
     }
   }
 
+  // 合并Child的options和Parent的options
   const options = {};
   let key;
   for (key in parent) {
@@ -421,6 +437,10 @@ export function mergeOptions(
       mergeField(key);
     }
   }
+  // const defaultStrat = function (parentVal: any, childVal: any): any {
+  //   return childVal === undefined ? parentVal : childVal;
+  // };
+  // strats[key] key属性的合并策略
   function mergeField(key) {
     const strat = strats[key] || defaultStrat;
     options[key] = strat(parent[key], child[key], vm, key);

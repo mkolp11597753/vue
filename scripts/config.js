@@ -228,6 +228,7 @@ const builds = {
   },
 };
 
+// 动态生成对应版本rollup配置文件
 function genConfig(name) {
   const opts = builds[name];
   const config = {

@@ -68,23 +68,27 @@ export function initMixin(Vue: Class<Component>) {
       mark(endTag);
       measure(`vue ${vm._name} init`, startTag, endTag);
     }
-
+    // 如果在options中配置了el 则调用$mount函数（也可以在创建的时候自己调用$mount）
     if (vm.$options.el) {
       vm.$mount(vm.$options.el);
     }
   };
 }
 
+// 组件的options合并策略
 export function initInternalComponent(
   vm: Component,
   options: InternalComponentOptions
 ) {
+  // 1.组件构造函数中的options
   const opts = (vm.$options = Object.create(vm.constructor.options));
   // doing this because it's faster than dynamic enumeration.
+  // 2.组件实例化时传入的options
   const parentVnode = options._parentVnode;
   opts.parent = options.parent;
   opts._parentVnode = parentVnode;
 
+  // 2.组件Vnode中包含的componentOptions
   const vnodeComponentOptions = parentVnode.componentOptions;
   opts.propsData = vnodeComponentOptions.propsData;
   opts._parentListeners = vnodeComponentOptions.listeners;
@@ -97,12 +101,18 @@ export function initInternalComponent(
   }
 }
 
+// 参数含义
+// options Ctor的options
+// superOptions Ctor的父类的options
+// sealedOptions
+// extendOptions
 export function resolveConstructorOptions(Ctor: Class<Component>) {
   let options = Ctor.options;
   if (Ctor.super) {
-    const superOptions = resolveConstructorOptions(Ctor.super);
-    const cachedSuperOptions = Ctor.superOptions;
+    const superOptions = resolveConstructorOptions(Ctor.super); // Vue的当前options
+    const cachedSuperOptions = Ctor.superOptions; // 之前的Vue的options
     if (superOptions !== cachedSuperOptions) {
+      // 保证Vue的$options发生改变后，子组件的$options也跟着改变
       // super option changed,
       // need to resolve new options.
       Ctor.superOptions = superOptions;
@@ -110,6 +120,7 @@ export function resolveConstructorOptions(Ctor: Class<Component>) {
       const modifiedOptions = resolveModifiedOptions(Ctor);
       // update base extend options
       if (modifiedOptions) {
+        // extend(to, from)
         extend(Ctor.extendOptions, modifiedOptions);
       }
       options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions);

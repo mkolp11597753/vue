@@ -17,7 +17,7 @@ import {
   mergeOptions,
   defineReactive,
 } from "../util/index";
-
+// 定义了Vue的全局静态方法
 export function initGlobalAPI(Vue: GlobalAPI) {
   // config
   const configDef = {};
@@ -52,8 +52,7 @@ export function initGlobalAPI(Vue: GlobalAPI) {
   //   return obj;
   // };
 
-  //Object.create(null)返回一个空对象，原型链也是空的
-
+  // 初始化Vue.options
   Vue.options = Object.create(null);
   ASSET_TYPES.forEach((type) => {
     Vue.options[type + "s"] = Object.create(null);
@@ -64,6 +63,7 @@ export function initGlobalAPI(Vue: GlobalAPI) {
   // Vue.options._base 指向构造函数Vue
   Vue.options._base = Vue;
 
+  // 添加Vue的内置组件
   extend(Vue.options.components, builtInComponents);
 
   initUse(Vue);

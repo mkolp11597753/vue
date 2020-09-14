@@ -29,24 +29,30 @@ export function setActiveInstance(vm: Component) {
   };
 }
 
+// 创建父子关系
 export function initLifecycle(vm: Component) {
-  const options = vm.$options;
+  const options = vm.$options; // 在构造函数中调用的_init 函数，已经对$options进行了初始化,这里可以直接获取
 
   // locate first non-abstract parent
+  // <keep-alive> is an abstract component: it doesn’t render a DOM element itself, and doesn’t show up in the component parent chain.
   let parent = options.parent;
   if (parent && !options.abstract) {
+    // 如果parent为abstract component(抽象组件<keep-alive>) 则向上寻找直到找到真正的parent
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent;
     }
+    // 把当前组件添加到父组件的children数组中
     parent.$children.push(vm);
   }
 
+  // 初始化vm的$parent 判断是否为根组件，不是根组件 则向上查找root，否则vm.$root = vm
   vm.$parent = parent;
   vm.$root = parent ? parent.$root : vm;
 
   vm.$children = [];
   vm.$refs = {};
 
+  // 初始化lifesycle状态
   vm._watcher = null;
   vm._inactive = null;
   vm._directInactive = false;
@@ -56,21 +62,26 @@ export function initLifecycle(vm: Component) {
 }
 
 export function lifecycleMixin(Vue: Class<Component>) {
+  // vnode: 渲染vnode
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this;
     const prevEl = vm.$el;
-    const prevVnode = vm._vnode;
+    const prevVnode = vm._vnode; // 缓存_vnode
+
+    // 构建父子关系的重要函数: setActiveInstance
     const restoreActiveInstance = setActiveInstance(vm);
     vm._vnode = vnode;
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
       // initial render
+      // create
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
     } else {
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode);
     }
+
     restoreActiveInstance();
     // update __vue__ reference
     if (prevEl) {
@@ -80,6 +91,7 @@ export function lifecycleMixin(Vue: Class<Component>) {
       vm.$el.__vue__ = vm;
     }
     // if parent is an HOC, update its $el as well
+    // 待验证：如果是这种结构<App><Children></Children></App>
     if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
       vm.$parent.$el = vm.$el;
     }
@@ -180,7 +192,7 @@ export function mountComponent(
       const endTag = `vue-perf-end:${id}`;
 
       mark(startTag);
-      // 返回虚拟vnode节点
+      // 执行render函数，返回虚拟vnode节点
       const vnode = vm._render();
       mark(endTag);
       measure(`vue ${name} render`, startTag, endTag);
@@ -192,6 +204,7 @@ export function mountComponent(
       measure(`vue ${name} patch`, startTag, endTag);
     };
   } else {
+    // 核心函数
     updateComponent = () => {
       vm._update(vm._render(), hydrating);
     };
@@ -202,13 +215,7 @@ export function mountComponent(
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   //
   // component's mounted hook), which relies on vm._watcher being already defined
-  // Watcher(
-  //   vm: Component,
-  //   expOrFn: string | Function,
-  //   cb: Function,
-  //   options?: ?Object,
-  //   isRenderWatcher?: boolean
-  // )
+  // 渲染watcher
   new Watcher(
     vm,
     updateComponent,

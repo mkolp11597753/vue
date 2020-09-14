@@ -14,6 +14,7 @@ if (process.env.NODE_ENV !== "production") {
   );
 
   const warnNonPresent = (target, key) => {
+    // 没有在实例上定义属性或方法${key}，请确保${key}是反应性的
     warn(
       `Property or method "${key}" is not defined on the instance but ` +
         "referenced during render. Make sure that this property is reactive, " +
@@ -56,6 +57,7 @@ if (process.env.NODE_ENV !== "production") {
     });
   }
 
+  // handler.has in操作符捕捉器
   const hasHandler = {
     has(target, key) {
       const has = key in target; // 查找本身的property，包括原型链
@@ -66,6 +68,10 @@ if (process.env.NODE_ENV !== "production") {
       // "require"
       // if (isAllowed === true) return has || false
       // if(isAllowed === false) return true
+      // key以'_'开头 并且不是$data里的属性  => !isAllowed = false   _a  _b
+      // 1。'_'开头 是$data里的属性 _parent _vnode， 2.不是_开头的属性 otherKey   => !isAllowed = true
+
+      // isAllowed : global方法里有 或者 _开头 并且不在$data里
       const isAllowed =
         allowedGlobals(key) ||
         (typeof key === "string" &&

@@ -12,12 +12,14 @@ import {
   shouldDecodeNewlinesForHref,
 } from "./util/compat";
 
+// query里封装了querySelector 用来查找Element
+// cached 闭包函数 缓存已查询过的Element
 const idToTemplate = cached((id) => {
   const el = query(id);
   return el && el.innerHTML;
 });
 
-// 缓存Vue运行时的mount函数
+// 缓存Vue-runtime-mount 函数
 const mount = Vue.prototype.$mount;
 // 重新定义mount
 Vue.prototype.$mount = function (
