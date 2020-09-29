@@ -36,7 +36,7 @@ export function initExtend(Vue: GlobalAPI) {
     Sub.prototype = Object.create(Super.prototype); // Sub.prototype.__proto__ = Super.prototype
     Sub.prototype.constructor = Sub;
     Sub.cid = cid++;
-    // components的合并
+    // 根据合并策略来合并options
     Sub.options = mergeOptions(Super.options, extendOptions);
     Sub["super"] = Super;
 

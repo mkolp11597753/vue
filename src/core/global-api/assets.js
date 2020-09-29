@@ -28,6 +28,7 @@ export function initAssetRegisters(Vue: GlobalAPI) {
         if (type === "directive" && typeof definition === "function") {
           definition = { bind: definition, update: definition };
         }
+        // Vue对象的options['components']
         this.options[type + "s"][id] = definition;
         return definition;
       }

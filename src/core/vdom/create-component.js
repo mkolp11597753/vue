@@ -108,7 +108,8 @@ export function createComponent(
   const baseCtor = context.$options._base;
 
   // plain options object: turn it into a constructor
-  // 为VueComponent赋予Vue的特性 生成构造器
+  // 初始化component的构造函数 Sub
+  // Ctor如果是Object，则转化成构造函数
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor);
   }
@@ -123,6 +124,7 @@ export function createComponent(
   }
 
   // async component
+  // Ctor为工厂函数时，是没有cid属性的，cid是生成构造函数时添加的属性
   let asyncFactory;
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor;
@@ -131,6 +133,7 @@ export function createComponent(
       // return a placeholder node for async component, which is rendered
       // as a comment node but preserves all the raw information for the node.
       // the information will be used for async server-rendering and hydration.
+      // 生成一个占位符节点 <!---->
       return createAsyncPlaceholder(asyncFactory, data, context, children, tag);
     }
   }

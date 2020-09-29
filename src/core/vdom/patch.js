@@ -197,6 +197,8 @@ export function createPatchFunction(backend) {
         // 再创建children的elm，children的parentElm = vnode.elm
         createChildren(vnode, children, insertedVnodeQueue);
         if (isDef(data)) {
+          // 组件 必定会进入的逻辑
+          // data: VNodeData 组件初始化的时候注册组件的hooks data 一定不为null
           invokeCreateHooks(vnode, insertedVnodeQueue);
         }
         insert(parentElm, vnode.elm, refElm);
@@ -220,7 +222,7 @@ export function createPatchFunction(backend) {
     if (isDef(i)) {
       // 如果vnode已经有实例化对象
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive;
-      // 调用VueComponent 的init钩子函数，实例化组件
+      // 实例化组件
       if (isDef((i = i.hook)) && isDef((i = i.init))) {
         i(vnode, false /* hydrating */);
       }
@@ -702,6 +704,7 @@ export function createPatchFunction(backend) {
     if (isTrue(initial) && isDef(vnode.parent)) {
       vnode.parent.data.pendingInsert = queue;
     } else {
+      // 触发insert事件
       for (let i = 0; i < queue.length; ++i) {
         queue[i].data.hook.insert(queue[i]);
       }
@@ -882,7 +885,7 @@ export function createPatchFunction(backend) {
           }
           // either not server-rendered, or hydration failed.
           // create an empty node and replace it
-          // 把真实element转化为Vnode
+          // 把真实element转化为一个空的Vnode
           oldVnode = emptyNodeAt(oldVnode);
         }
 

@@ -91,7 +91,7 @@ export function lifecycleMixin(Vue: Class<Component>) {
       vm.$el.__vue__ = vm;
     }
     // if parent is an HOC, update its $el as well
-    // 待验证：如果是这种结构<App><Children></Children></App>
+    // 如果是这种结构<App><Children></Children></App>
     if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
       vm.$parent.$el = vm.$el;
     }

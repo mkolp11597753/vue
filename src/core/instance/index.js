@@ -15,7 +15,7 @@ function Vue(options) {
 
 // 分成多个模块，对Vue的原型进行扩展
 initMixin(Vue); // 初始化相关
-stateMixin(Vue); //
+stateMixin(Vue);
 eventsMixin(Vue);
 lifecycleMixin(Vue); // 生命周期相关
 renderMixin(Vue); // render相关
